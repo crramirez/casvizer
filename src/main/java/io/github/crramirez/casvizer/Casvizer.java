@@ -22,8 +22,6 @@ import casciian.TWindow;
 import casciian.event.TMenuEvent;
 import casciian.menu.TMenu;
 import io.github.crramirez.casvizer.model.ConnectionProfile;
-import io.github.crramirez.casvizer.model.DatabaseConnection;
-import io.github.crramirez.casvizer.model.QueryResult;
 import io.github.crramirez.casvizer.persistence.ProfileStore;
 import io.github.crramirez.casvizer.service.ConnectionService;
 import io.github.crramirez.casvizer.service.MetadataService;
@@ -33,7 +31,7 @@ import io.github.crramirez.casvizer.ui.ConnectionDialog;
 import io.github.crramirez.casvizer.ui.DatabaseBrowserWindow;
 import io.github.crramirez.casvizer.ui.QueryEditorWindow;
 
-import java.io.File;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -74,7 +72,7 @@ public class Casvizer extends TApplication {
         
         // Initialize profile store
         String userHome = System.getProperty("user.home");
-        String profilesPath = userHome + File.separator + ".casvizer" + File.separator + "profiles.json";
+        String profilesPath = Paths.get(userHome, ".casvizer", "profiles.json").toString();
         this.profileStore = new ProfileStore(profilesPath);
         
         // Setup menus

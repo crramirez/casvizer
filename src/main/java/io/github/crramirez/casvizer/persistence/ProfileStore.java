@@ -100,6 +100,13 @@ public class ProfileStore {
         }
     }
 
+    /**
+     * Adds a connection profile. If a profile with the same name already exists,
+     * it will be silently replaced with the new profile.
+     * 
+     * @param profile The profile to add
+     * @throws IOException if an error occurs while saving
+     */
     public void addProfile(ConnectionProfile profile) throws IOException {
         List<ConnectionProfile> profiles = loadProfiles();
         

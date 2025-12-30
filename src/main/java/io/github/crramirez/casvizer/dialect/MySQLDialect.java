@@ -24,6 +24,9 @@ public class MySQLDialect implements Dialect {
 
     @Override
     public String quoteIdentifier(String identifier) {
+        if (identifier == null || identifier.isEmpty()) {
+            throw new IllegalArgumentException("Identifier must be non-null and non-empty");
+        }
         return "`" + identifier.replace("`", "``") + "`";
     }
 

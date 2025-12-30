@@ -20,9 +20,6 @@ package io.github.crramirez.casvizer.ui;
 import casciian.TApplication;
 import casciian.TWidget;
 import casciian.TWindow;
-import casciian.bits.CellAttributes;
-import casciian.bits.GraphicsChars;
-import casciian.event.TKeypressEvent;
 import io.github.crramirez.casvizer.model.ConnectionProfile;
 import io.github.crramirez.casvizer.persistence.ProfileStore;
 import io.github.crramirez.casvizer.service.ConnectionService;
@@ -31,10 +28,16 @@ import java.util.List;
 
 /**
  * Dialog for creating/selecting database connections.
+ * 
+ * Note: This is an MVP implementation with hardcoded connection values.
+ * The form fields are displayed but not currently connected to the connection logic.
+ * Future enhancement: Store TField references to read user input.
  */
 public class ConnectionDialog extends TWindow {
     private final ProfileStore profileStore;
     private final ConnectionService connectionService;
+    // Note: profiles parameter reserved for future use when profile selection is implemented
+    @SuppressWarnings("unused")
     private final List<ConnectionProfile> profiles;
 
     public ConnectionDialog(TApplication application, ProfileStore profileStore,

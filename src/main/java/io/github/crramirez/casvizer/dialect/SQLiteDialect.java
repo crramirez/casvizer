@@ -24,6 +24,9 @@ public class SQLiteDialect implements Dialect {
 
     @Override
     public String quoteIdentifier(String identifier) {
+        if (identifier == null || identifier.isEmpty()) {
+            throw new IllegalArgumentException("Identifier must not be null or empty");
+        }
         return "\"" + identifier.replace("\"", "\"\"") + "\"";
     }
 
