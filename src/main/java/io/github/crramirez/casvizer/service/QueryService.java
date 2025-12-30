@@ -34,6 +34,11 @@ import java.util.List;
  */
 public class QueryService {
     
+    /**
+     * Maximum allowed offset value for paginated queries to prevent resource exhaustion.
+     */
+    private static final int MAX_QUERY_OFFSET = 1_000_000;
+    
     public QueryResult executeQuery(DatabaseConnection dbConnection, String query) throws SQLException {
         return executeQuery(dbConnection, query, -1, 0);
     }
@@ -44,8 +49,8 @@ public class QueryService {
         // Add pagination if specified
         if (limit > 0) {
             // Validate offset to prevent resource exhaustion from extremely large values
-            if (offset > 1000000) { // 1 million row offset limit
-                throw new IllegalArgumentException("Offset too large: " + offset + ". Maximum allowed is 1,000,000");
+            if (offset > MAX_QUERY_OFFSET) {
+                throw new IllegalArgumentException("Offset too large: " + offset + ". Maximum allowed is " + MAX_QUERY_OFFSET);
             }
             Dialect dialect = DialectFactory.getDialect(dbConnection.getDatabaseType());
             query = dialect.addPagination(query, limit, offset);

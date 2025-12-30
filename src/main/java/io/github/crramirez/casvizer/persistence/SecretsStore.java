@@ -48,10 +48,13 @@ public class SecretsStore {
     }
 
     /**
-     * Encrypts plaintext string.
+     * Encrypts a plaintext string.
+     * <p>
+     * If {@code plainText} is {@code null} or empty, the value is returned as-is
+     * and no encryption is performed.
      * 
-     * @param plainText The text to encrypt
-     * @return Encrypted text
+     * @param plainText The text to encrypt; may be {@code null} or empty
+     * @return Encrypted text, or the original value if {@code plainText} is {@code null} or empty
      */
     public String encrypt(String plainText) {
         if (plainText == null || plainText.isEmpty()) {
@@ -65,7 +68,9 @@ public class SecretsStore {
      * 
      * @param encryptedText The text to decrypt
      * @return Decrypted text
-     * @throws IllegalStateException if decryption fails
+     * @throws IllegalStateException if decryption fails, indicating configuration errors
+     *         or corrupted data. Verify CASVIZER_MASTER_PASSWORD environment variable
+     *         is correctly configured.
      */
     public String decrypt(String encryptedText) {
         if (encryptedText == null || encryptedText.isEmpty()) {
@@ -74,10 +79,6 @@ public class SecretsStore {
         try {
             return encryptor.decrypt(encryptedText);
         } catch (Exception e) {
-            System.err.println("ERROR: Failed to decrypt value in SecretsStore. " +
-                "Check that CASVIZER_MASTER_PASSWORD is correctly configured and that " +
-                "stored secrets have not been corrupted.");
-            e.printStackTrace(System.err);
             throw new IllegalStateException(
                 "Failed to decrypt secret. Verify CASVIZER_MASTER_PASSWORD and stored data integrity.",
                 e

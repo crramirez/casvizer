@@ -126,8 +126,11 @@ public class QueryEditorWindow extends TWindow {
         
         try {
             // Use system-appropriate temporary directory
-            String tempDir = System.getProperty("java.io.tmpdir");
-            String filename = tempDir + (tempDir.endsWith(java.io.File.separator) ? "" : java.io.File.separator) + "query_results.csv";
+            java.nio.file.Path tempPath = java.nio.file.Paths.get(
+                System.getProperty("java.io.tmpdir"), 
+                "query_results.csv"
+            );
+            String filename = tempPath.toString();
             exportService.exportToCSV(currentResult, filename);
             getApplication().messageBox("Success", "Results exported to " + filename);
         } catch (Exception e) {

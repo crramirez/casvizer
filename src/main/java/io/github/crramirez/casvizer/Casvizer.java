@@ -41,6 +41,11 @@ import java.util.List;
  */
 public class Casvizer extends TApplication {
     
+    /**
+     * Application version number.
+     */
+    private static final String VERSION = "0.1.0";
+    
     private final ConnectionService connectionService;
     private final MetadataService metadataService;
     private final QueryService queryService;
@@ -208,7 +213,7 @@ public class Casvizer extends TApplication {
                 TWindow.CENTERED | TWindow.MODAL);
 
         int row = 1;
-        window.addLabel("Casvizer v0.1.0", 2, row++, "ttext");
+        window.addLabel("Casvizer v" + VERSION, 2, row++, "ttext");
         window.addLabel("", 2, row++);
         window.addLabel("Database Visualization TUI Tool", 2, row++);
         window.addLabel("Built with Casciian", 2, row++);

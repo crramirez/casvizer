@@ -123,7 +123,7 @@ public class ExportService {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
             List<String> columns = result.getColumnNames();
             
-            // Calculate column widths
+            // Calculate column widths (considering newline replacement in values)
             int[] widths = new int[columns.size()];
             for (int i = 0; i < columns.size(); i++) {
                 widths[i] = columns.get(i).length();
@@ -132,6 +132,8 @@ public class ExportService {
             for (List<Object> row : result.getRows()) {
                 for (int i = 0; i < row.size(); i++) {
                     String value = row.get(i) != null ? row.get(i).toString() : "NULL";
+                    // Calculate width after newline replacement
+                    value = value.replace("\r\n", " ").replace("\n", " ").replace("\r", " ");
                     widths[i] = Math.max(widths[i], value.length());
                 }
             }
