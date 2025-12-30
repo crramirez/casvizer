@@ -83,6 +83,8 @@ public class ConnectionDialog extends TWindow {
     }
 
     private void handleConnect() {
+        // TODO: Read values from form fields instead of using hardcoded values
+        // This requires proper field references and TUI field access methods
         try {
             // Create connection profile from form data
             ConnectionProfile profile = new ConnectionProfile("temp", "postgresql");
@@ -104,6 +106,7 @@ public class ConnectionDialog extends TWindow {
     }
 
     private void handleSaveProfile() {
+        // TODO: Read values from form fields instead of using hardcoded values
         try {
             // Create connection profile from form data
             ConnectionProfile profile = new ConnectionProfile("MyProfile", "postgresql");

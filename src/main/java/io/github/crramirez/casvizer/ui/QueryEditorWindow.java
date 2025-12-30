@@ -65,6 +65,8 @@ public class QueryEditorWindow extends TWindow {
     }
 
     private void executeQuery() {
+        // TODO: Read query from a text editor field instead of hardcoded value
+        // This requires implementing or using TEditor/TTextArea component
         try {
             // Example query execution
             String query = "SELECT 1 as test_column";
@@ -78,6 +80,7 @@ public class QueryEditorWindow extends TWindow {
     }
 
     private void displayResults(QueryResult result) {
+        // TODO: Calculate row position dynamically based on UI layout
         int row = 10;
         
         // Display column headers

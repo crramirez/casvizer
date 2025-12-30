@@ -33,6 +33,9 @@ public class DatabaseBrowserWindow extends TWindow {
     private final ConnectionService connectionService;
     private final MetadataService metadataService;
     private final QueryService queryService;
+    
+    // UI layout constants
+    private static final int BOTTOM_MARGIN = 4;
 
     public DatabaseBrowserWindow(TApplication application, ConnectionService connectionService,
                                 MetadataService metadataService, QueryService queryService) {
@@ -71,13 +74,13 @@ public class DatabaseBrowserWindow extends TWindow {
             // Display schemas in the window
             int row = 3;
             for (String schema : schemas) {
-                if (row < getHeight() - 4) {
+                if (row < getHeight() - BOTTOM_MARGIN) {
                     addLabel("Schema: " + schema, 2, row++);
                     
                     // List tables in schema
                     List<String> tables = metadataService.listTables(connection, schema);
                     for (String table : tables) {
-                        if (row < getHeight() - 4) {
+                        if (row < getHeight() - BOTTOM_MARGIN) {
                             addLabel("  Table: " + table, 2, row++);
                         }
                     }
