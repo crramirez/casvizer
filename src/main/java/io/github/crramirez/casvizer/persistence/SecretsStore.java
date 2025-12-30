@@ -1,0 +1,93 @@
+/*
+ * Casvizer - Database visualization TUI tool
+ *
+ * Copyright 2025 Carlos Rafael Ramirez
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package io.github.crramirez.casvizer.persistence;
+
+import org.jasypt.util.text.BasicTextEncryptor;
+
+/**
+ * Handles encryption and decryption of sensitive data like passwords.
+ * 
+ * Security Note: Uses a default encryption key if CASVIZER_MASTER_PASSWORD 
+ * environment variable is not set. For production use, always set a strong 
+ * master password via the environment variable.
+ */
+public class SecretsStore {
+    private final BasicTextEncryptor encryptor;
+    private static final String DEFAULT_PASSWORD = "casvizer-secret-key-change-me";
+
+    /**
+     * Constructor. Initializes the encryptor with either the environment-provided
+     * password or a default password with a warning.
+     * <p>
+     * <strong>Security Warning:</strong> If CASVIZER_MASTER_PASSWORD is not set, a default
+     * password is used. This warning is printed to stderr, which may not be visible in a TUI
+     * application. Consider checking the log files or running the application in a terminal
+     * to see security warnings.
+     */
+    public SecretsStore() {
+        this.encryptor = new BasicTextEncryptor();
+        // In production, this should come from environment variable or secure key store
+        String password = System.getenv("CASVIZER_MASTER_PASSWORD");
+        if (password == null || password.isEmpty()) {
+            password = DEFAULT_PASSWORD;
+            // Warn user about insecure default
+            System.err.println("WARNING: Using default encryption password. " +
+                "Set CASVIZER_MASTER_PASSWORD environment variable for better security.");
+        }
+        encryptor.setPassword(password);
+    }
+
+    /**
+     * Encrypts a plaintext string.
+     * <p>
+     * If {@code plainText} is {@code null} or empty, the value is returned as-is
+     * and no encryption is performed.
+     * 
+     * @param plainText The text to encrypt; may be {@code null} or empty
+     * @return Encrypted text, or the original value if {@code plainText} is {@code null} or empty
+     */
+    public String encrypt(String plainText) {
+        if (plainText == null || plainText.isEmpty()) {
+            return plainText;
+        }
+        return encryptor.encrypt(plainText);
+    }
+
+    /**
+     * Decrypts encrypted text.
+     * 
+     * @param encryptedText The text to decrypt
+     * @return Decrypted text
+     * @throws IllegalStateException if decryption fails, indicating configuration errors
+     *         or corrupted data. Verify CASVIZER_MASTER_PASSWORD environment variable
+     *         is correctly configured.
+     */
+    public String decrypt(String encryptedText) {
+        if (encryptedText == null || encryptedText.isEmpty()) {
+            return encryptedText;
+        }
+        try {
+            return encryptor.decrypt(encryptedText);
+        } catch (Exception e) {
+            throw new IllegalStateException(
+                "Failed to decrypt secret. Verify CASVIZER_MASTER_PASSWORD and stored data integrity.",
+                e
+            );
+        }
+    }
+}
