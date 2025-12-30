@@ -65,6 +65,7 @@ public class SecretsStore {
      * 
      * @param encryptedText The text to decrypt
      * @return Decrypted text
+     * @throws IllegalStateException if decryption fails
      */
     public String decrypt(String encryptedText) {
         if (encryptedText == null || encryptedText.isEmpty()) {
@@ -73,12 +74,14 @@ public class SecretsStore {
         try {
             return encryptor.decrypt(encryptedText);
         } catch (Exception e) {
-            System.err.println("WARNING: Failed to decrypt value in SecretsStore. " +
-                "Falling back to returning the original text. " +
-                "Check that CASVIZER_MASTER_PASSWORD is correctly configured.");
+            System.err.println("ERROR: Failed to decrypt value in SecretsStore. " +
+                "Check that CASVIZER_MASTER_PASSWORD is correctly configured and that " +
+                "stored secrets have not been corrupted.");
             e.printStackTrace(System.err);
-            // If decryption fails, assume it's already plaintext
-            return encryptedText;
+            throw new IllegalStateException(
+                "Failed to decrypt secret. Verify CASVIZER_MASTER_PASSWORD and stored data integrity.",
+                e
+            );
         }
     }
 }

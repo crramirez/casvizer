@@ -78,6 +78,17 @@ public class Casvizer extends TApplication {
         // Show welcome window
         showWelcomeWindow();
     }
+    
+    @Override
+    public void onExit() {
+        // Cleanup: disconnect all database connections
+        try {
+            connectionService.disconnectAll();
+        } catch (Exception e) {
+            System.err.println("Error disconnecting database connections: " + e.getMessage());
+        }
+        super.onExit();
+    }
 
     private void setupMenus() {
         TMenu connectionMenu = addMenu("&Connection");

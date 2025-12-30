@@ -79,11 +79,12 @@ public class MetadataService {
                     columns.add(new ColumnInfo(name, type, nullable, defaultValue));
                 }
             } else {
+                // For PostgreSQL and MySQL, use column indices for robustness
                 while (rs.next()) {
-                    String name = rs.getString("column_name");
-                    String type = rs.getString("data_type");
-                    boolean nullable = "YES".equals(rs.getString("is_nullable"));
-                    String defaultValue = rs.getString("column_default");
+                    String name = rs.getString(1);  // column_name
+                    String type = rs.getString(2);  // data_type
+                    boolean nullable = "YES".equals(rs.getString(3));  // is_nullable
+                    String defaultValue = rs.getString(4);  // column_default
                     columns.add(new ColumnInfo(name, type, nullable, defaultValue));
                 }
             }

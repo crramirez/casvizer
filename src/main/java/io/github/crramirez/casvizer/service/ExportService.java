@@ -32,25 +32,39 @@ public class ExportService {
     
     public void exportToCSV(QueryResult result, String filename) throws IOException {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
-            // Write header
-            writer.println(String.join(",", result.getColumnNames()));
+            // Write header with proper escaping
+            List<String> escapedHeaders = new ArrayList<>();
+            for (String columnName : result.getColumnNames()) {
+                escapedHeaders.add(escapeCsvValue(columnName));
+            }
+            writer.println(String.join(",", escapedHeaders));
             
             // Write rows
             for (List<Object> row : result.getRows()) {
                 List<String> values = new ArrayList<>();
                 for (Object value : row) {
                     String strValue = value != null ? value.toString() : "";
-                    // Escape quotes, newlines, and wrap in quotes if contains comma, quote, or newline
-                    if (strValue.contains(",") || strValue.contains("\"") || strValue.contains("\n") || strValue.contains("\r")) {
-                        // Replace newlines with space or escaped newline
-                        strValue = strValue.replace("\r\n", " ").replace("\n", " ").replace("\r", " ");
-                        strValue = "\"" + strValue.replace("\"", "\"\"") + "\"";
-                    }
-                    values.add(strValue);
+                    values.add(escapeCsvValue(strValue));
                 }
                 writer.println(String.join(",", values));
             }
         }
+    }
+    
+    /**
+     * Escape a value for CSV output according to RFC 4180.
+     * Preserves newlines within quoted fields.
+     */
+    private String escapeCsvValue(String value) {
+        if (value == null) {
+            return "";
+        }
+        // Escape quotes and wrap in quotes if contains comma, quote, or newline (RFC 4180)
+        if (value.contains(",") || value.contains("\"") || value.contains("\n") || value.contains("\r")) {
+            // Preserve newlines; only escape double quotes and quote the entire field
+            return "\"" + value.replace("\"", "\"\"") + "\"";
+        }
+        return value;
     }
 
     public void exportToSQL(QueryResult result, String tableName, String filename) throws IOException {

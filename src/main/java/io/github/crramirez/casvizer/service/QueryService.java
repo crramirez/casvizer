@@ -43,6 +43,10 @@ public class QueryService {
         
         // Add pagination if specified
         if (limit > 0) {
+            // Validate offset to prevent resource exhaustion from extremely large values
+            if (offset > 1000000) { // 1 million row offset limit
+                throw new IllegalArgumentException("Offset too large: " + offset + ". Maximum allowed is 1,000,000");
+            }
             Dialect dialect = DialectFactory.getDialect(dbConnection.getDatabaseType());
             query = dialect.addPagination(query, limit, offset);
         }

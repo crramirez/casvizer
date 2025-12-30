@@ -107,13 +107,38 @@ public class ConnectionProfile {
     }
 
     private String buildJdbcUrl() {
+        if (databaseType == null || databaseType.isEmpty()) {
+            throw new IllegalArgumentException("Database type must be specified");
+        }
+        
         switch (databaseType.toLowerCase()) {
             case "postgres":
             case "postgresql":
+                if (host == null || host.isEmpty()) {
+                    throw new IllegalArgumentException("Host must be specified for PostgreSQL");
+                }
+                if (database == null || database.isEmpty()) {
+                    throw new IllegalArgumentException("Database must be specified for PostgreSQL");
+                }
+                if (port <= 0) {
+                    throw new IllegalArgumentException("Port must be specified for PostgreSQL");
+                }
                 return String.format("jdbc:postgresql://%s:%d/%s", host, port, database);
             case "mysql":
+                if (host == null || host.isEmpty()) {
+                    throw new IllegalArgumentException("Host must be specified for MySQL");
+                }
+                if (database == null || database.isEmpty()) {
+                    throw new IllegalArgumentException("Database must be specified for MySQL");
+                }
+                if (port <= 0) {
+                    throw new IllegalArgumentException("Port must be specified for MySQL");
+                }
                 return String.format("jdbc:mysql://%s:%d/%s", host, port, database);
             case "sqlite":
+                if (database == null || database.isEmpty()) {
+                    throw new IllegalArgumentException("Database file path must be specified for SQLite");
+                }
                 return String.format("jdbc:sqlite:%s", database);
             default:
                 throw new IllegalArgumentException("Unsupported database type: " + databaseType);
