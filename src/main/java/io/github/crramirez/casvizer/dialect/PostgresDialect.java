@@ -60,7 +60,7 @@ public class PostgresDialect implements Dialect {
         }
         // Use quoted identifier to prevent SQL injection
         return "SELECT table_name FROM information_schema.tables " +
-               "WHERE table_schema = " + quoteStringLiteral(schema) + " AND table_type = 'BASE TABLE' " +
+               "WHERE table_schema = " + DialectUtils.quoteStringLiteral(schema) + " AND table_type = 'BASE TABLE' " +
                "ORDER BY table_name";
     }
 
@@ -72,19 +72,12 @@ public class PostgresDialect implements Dialect {
         // Use quoted identifiers to prevent SQL injection
         return "SELECT column_name, data_type, is_nullable, column_default " +
                "FROM information_schema.columns " +
-               "WHERE table_schema = " + quoteStringLiteral(schema) + " AND table_name = " + quoteStringLiteral(table) + " " +
+               "WHERE table_schema = " + DialectUtils.quoteStringLiteral(schema) + " AND table_name = " + DialectUtils.quoteStringLiteral(table) + " " +
                "ORDER BY ordinal_position";
     }
 
     @Override
     public String getName() {
         return "PostgreSQL";
-    }
-    
-    /**
-     * Quote a string literal for use in SQL queries.
-     */
-    private String quoteStringLiteral(String literal) {
-        return "'" + literal.replace("'", "''") + "'";
     }
 }

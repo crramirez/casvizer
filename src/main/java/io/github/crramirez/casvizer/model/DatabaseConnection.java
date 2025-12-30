@@ -49,15 +49,8 @@ public class DatabaseConnection {
 
     public void disconnect() throws SQLException {
         try {
-            if (connection != null) {
-                try {
-                    if (!connection.isClosed()) {
-                        connection.close();
-                    }
-                } catch (SQLException closeEx) {
-                    // Log the close exception but don't mask it
-                    throw closeEx;
-                }
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
             }
         } finally {
             connected = false;

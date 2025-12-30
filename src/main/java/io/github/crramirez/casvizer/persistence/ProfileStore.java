@@ -59,6 +59,16 @@ public class ProfileStore {
         }
     }
 
+    /**
+     * Loads all connection profiles from disk and decrypts their passwords.
+     * <p>
+     * <strong>Performance Note:</strong> All profiles are loaded into memory and passwords
+     * are decrypted on every call. For applications with many profiles, consider implementing
+     * caching with appropriate invalidation strategies.
+     * 
+     * @return List of connection profiles with decrypted passwords
+     * @throws IOException if an error occurs while reading profiles
+     */
     public List<ConnectionProfile> loadProfiles() throws IOException {
         if (!profilesFile.exists()) {
             return new ArrayList<>();
@@ -105,16 +115,19 @@ public class ProfileStore {
      * it will be silently replaced with the new profile.
      * 
      * @param profile The profile to add
+     * @return {@code true} if an existing profile with the same name was replaced,
+     *         {@code false} if this was a new profile
      * @throws IOException if an error occurs while saving
      */
-    public void addProfile(ConnectionProfile profile) throws IOException {
+    public boolean addProfile(ConnectionProfile profile) throws IOException {
         List<ConnectionProfile> profiles = loadProfiles();
         
-        // Remove existing profile with same name
-        profiles.removeIf(p -> p.getName().equals(profile.getName()));
+        // Remove existing profile with same name; track whether replacement occurred
+        boolean replaced = profiles.removeIf(p -> p.getName().equals(profile.getName()));
         
         profiles.add(profile);
         saveProfiles(profiles);
+        return replaced;
     }
 
     public void deleteProfile(String profileName) throws IOException {

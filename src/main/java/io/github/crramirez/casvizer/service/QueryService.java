@@ -54,7 +54,11 @@ public class QueryService {
     /**
      * Executes a SQL query with optional pagination.
      * <p>
-     * Note: Execution time includes both query execution and result set processing time.
+     * <strong>Note:</strong> This method loads all results into memory. For queries returning
+     * very large result sets, this could cause OutOfMemoryError. Consider using pagination
+     * with appropriate limit values to manage memory usage.
+     * <p>
+     * Execution time includes both query execution and result set processing time.
      * 
      * @param dbConnection The database connection to use
      * @param query The SQL query to execute

@@ -21,6 +21,10 @@ import java.util.List;
 
 /**
  * Represents the result of a database query execution.
+ * <p>
+ * <strong>Immutability Note:</strong> This class stores references to mutable lists.
+ * Callers must not modify the provided lists after construction to maintain consistency
+ * between the stored data and the rowCount field.
  */
 public class QueryResult {
     private final List<String> columnNames;

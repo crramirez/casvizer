@@ -28,12 +28,16 @@ import java.util.Map;
 
 /**
  * Service for managing database connections.
+ * <p>
+ * <strong>Thread Safety Note:</strong> This class is not thread-safe. Concurrent access
+ * to connect(), disconnect(), or disconnectAll() methods may lead to race conditions.
+ * Synchronize access if used in a multi-threaded environment.
  */
 public class ConnectionService {
     private final Map<String, DatabaseConnection> connections = new HashMap<>();
     private DatabaseConnection activeConnection;
 
-    public DatabaseConnection connect(ConnectionProfile profile) throws SQLException {
+    public synchronized DatabaseConnection connect(ConnectionProfile profile) throws SQLException {
         DatabaseConnection connection = new DatabaseConnection(profile);
         connection.connect();
         connections.put(profile.getName(), connection);
@@ -41,7 +45,7 @@ public class ConnectionService {
         return connection;
     }
 
-    public void disconnect(String profileName) throws SQLException {
+    public synchronized void disconnect(String profileName) throws SQLException {
         DatabaseConnection connection = connections.get(profileName);
         if (connection != null) {
             connection.disconnect();
@@ -52,7 +56,7 @@ public class ConnectionService {
         }
     }
 
-    public void disconnectAll() throws SQLException {
+    public synchronized void disconnectAll() throws SQLException {
         // Create snapshot to avoid concurrent modification issues
         List<DatabaseConnection> snapshot = new ArrayList<>(connections.values());
         SQLException firstException = null;

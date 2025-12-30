@@ -61,9 +61,10 @@ public class SQLiteDialect implements Dialect {
 
     @Override
     public String getListColumnsQuery(String schema, String table) {
-        // Use string literal for the table name in PRAGMA to avoid issues with identifier quoting
-        String escapedTable = table.replace("'", "''");
-        return "PRAGMA table_info('" + escapedTable + "')";
+        // Use quoted identifier for the table name in PRAGMA to ensure consistency
+        // Note: SQLite PRAGMA table_info supports quoted identifiers
+        String quotedTable = quoteIdentifier(table);
+        return "PRAGMA table_info(" + quotedTable + ")";
     }
 
     @Override

@@ -33,6 +33,11 @@ public class SecretsStore {
     /**
      * Constructor. Initializes the encryptor with either the environment-provided
      * password or a default password with a warning.
+     * <p>
+     * <strong>Security Warning:</strong> If CASVIZER_MASTER_PASSWORD is not set, a default
+     * password is used. This warning is printed to stderr, which may not be visible in a TUI
+     * application. Consider checking the log files or running the application in a terminal
+     * to see security warnings.
      */
     public SecretsStore() {
         this.encryptor = new BasicTextEncryptor();
