@@ -161,6 +161,8 @@ public class ExportService {
                         writer.print(" | ");
                     }
                     String value = row.get(i) != null ? row.get(i).toString() : "NULL";
+                    // Replace newlines with space to prevent breaking table structure
+                    value = value.replace("\r\n", " ").replace("\n", " ").replace("\r", " ");
                     writer.print(String.format("%-" + widths[i] + "s", value));
                 }
                 writer.println();

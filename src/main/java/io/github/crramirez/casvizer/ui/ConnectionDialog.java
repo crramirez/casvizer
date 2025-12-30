@@ -107,8 +107,11 @@ public class ConnectionDialog extends TWindow {
 
     private void handleSaveProfile() {
         // TODO: Read values from form fields instead of using hardcoded values
+        // This requires storing references to TField widgets created in setupUI
+        // and calling getText() on each to retrieve user input
         try {
             // Create connection profile from form data
+            // NOTE: Currently using hardcoded values - form input is not read
             ConnectionProfile profile = new ConnectionProfile("MyProfile", "postgresql");
             profile.setHost("localhost");
             profile.setPort(5432);
