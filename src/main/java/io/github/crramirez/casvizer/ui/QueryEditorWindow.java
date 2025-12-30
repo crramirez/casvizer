@@ -18,6 +18,8 @@
 package io.github.crramirez.casvizer.ui;
 
 import casciian.TApplication;
+import casciian.TEditor;
+import casciian.TTable;
 import casciian.TWindow;
 import io.github.crramirez.casvizer.model.QueryResult;
 import io.github.crramirez.casvizer.service.ConnectionService;
@@ -33,10 +35,13 @@ public class QueryEditorWindow extends TWindow {
     private final ConnectionService connectionService;
     private final QueryService queryService;
     private final ExportService exportService;
+    private TEditor queryEditor;
+    private TTable resultsTable;
+    private QueryResult currentResult;
 
     public QueryEditorWindow(TApplication application, ConnectionService connectionService,
                             QueryService queryService, ExportService exportService) {
-        super(application, "Query Editor", 0, 0, 80, 24, RESIZABLE);
+        super(application, "Query Editor", 0, 0, 80, 30, RESIZABLE);
 
         this.connectionService = connectionService;
         this.queryService = queryService;
@@ -49,30 +54,34 @@ public class QueryEditorWindow extends TWindow {
         int row = 1;
         addLabel("SQL Query:", 2, row++);
         
-        // Add text area for query input
-        // Note: This is simplified - in production would use TEditor or TTextArea
-        addLabel("Enter SQL query and press Execute", 2, row++);
-        addLabel("Example: SELECT * FROM users LIMIT 10", 2, row++);
+        // Add text editor for query input
+        queryEditor = addEditor("SELECT 1 as test_column;", 2, row, getWidth() - 4, 6);
+        row += 7;
         
-        row++;
         addButton("&Execute", 2, row, this::executeQuery);
         addButton("E&xport Results", 15, row, this::exportResults);
         addButton("&Close", 33, row, this::close);
         
         row += 2;
         addLabel("Results:", 2, row++);
-        addLabel("Query results will appear here", 2, row++);
+        
+        // Add table for results display
+        resultsTable = addTable(2, row, getWidth() - 4, getHeight() - row - 1, 5, 10);
+        resultsTable.setShowColumnLabels(true);
     }
 
     private void executeQuery() {
-        // TODO: Read query from a text editor field instead of hardcoded value
-        // This requires implementing or using TEditor/TTextArea component
         try {
-            // Example query execution
-            String query = "SELECT 1 as test_column";
-            QueryResult result = queryService.executeQuery(
-                connectionService.getActiveConnection(), query);
+            String query = queryEditor.getText();
+            if (query == null || query.trim().isEmpty()) {
+                getApplication().messageBox("Error", "Please enter a SQL query");
+                return;
+            }
             
+            QueryResult result = queryService.executeQuery(
+                connectionService.getActiveConnection(), query.trim());
+            
+            currentResult = result;
             displayResults(result);
         } catch (Exception e) {
             getApplication().messageBox("Error", "Query execution failed: " + e.getMessage());
@@ -80,33 +89,47 @@ public class QueryEditorWindow extends TWindow {
     }
 
     private void displayResults(QueryResult result) {
-        // TODO: Calculate row position dynamically based on UI layout
-        int row = 10;
+        // Set up table columns and rows
+        int colCount = result.getColumnCount();
+        int rowCount = result.getRowCount();
         
-        // Display column headers
-        StringBuilder header = new StringBuilder();
-        for (String col : result.getColumnNames()) {
-            header.append(col).append(" | ");
-        }
-        addLabel(header.toString(), 2, row++);
+        resultsTable.setGridSize(colCount, rowCount);
         
-        // Display rows
-        for (List<Object> rowData : result.getRows()) {
-            StringBuilder rowStr = new StringBuilder();
-            for (Object value : rowData) {
-                rowStr.append(value != null ? value.toString() : "NULL").append(" | ");
-            }
-            if (row < getHeight() - 2) {
-                addLabel(rowStr.toString(), 2, row++);
-            }
+        // Set column headers
+        List<String> columns = result.getColumnNames();
+        for (int i = 0; i < columns.size(); i++) {
+            resultsTable.setColumnLabel(i, columns.get(i));
         }
         
-        // Display execution time
-        addLabel(String.format("Rows: %d, Time: %dms", 
-            result.getRowCount(), result.getExecutionTimeMs()), 2, row);
+        // Set data rows
+        List<List<Object>> rows = result.getRows();
+        for (int rowIdx = 0; rowIdx < rows.size(); rowIdx++) {
+            List<Object> row = rows.get(rowIdx);
+            for (int colIdx = 0; colIdx < row.size(); colIdx++) {
+                Object value = row.get(colIdx);
+                String cellValue = value != null ? value.toString() : "NULL";
+                resultsTable.setCellText(colIdx, rowIdx, cellValue);
+            }
+        }
+        
+        // Update status message
+        String statusMsg = String.format("Rows: %d, Time: %dms", 
+            result.getRowCount(), result.getExecutionTimeMs());
+        setTitle("Query Editor - " + statusMsg);
     }
 
     private void exportResults() {
-        getApplication().messageBox("Info", "Export functionality coming soon!");
+        if (currentResult == null) {
+            getApplication().messageBox("Info", "No results to export. Execute a query first.");
+            return;
+        }
+        
+        try {
+            String filename = "/tmp/query_results.csv";
+            exportService.exportToCSV(currentResult, filename);
+            getApplication().messageBox("Success", "Results exported to " + filename);
+        } catch (Exception e) {
+            getApplication().messageBox("Error", "Export failed: " + e.getMessage());
+        }
     }
 }

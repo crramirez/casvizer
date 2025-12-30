@@ -191,6 +191,7 @@ public class Casvizer extends TApplication {
         }
     }
 
+    @Override
     protected void showAboutDialog() {
         TWindow window = addWindow("About Casvizer", 0, 0, 50, 10,
                 TWindow.CENTERED | TWindow.MODAL);

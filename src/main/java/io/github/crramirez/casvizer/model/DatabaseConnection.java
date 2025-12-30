@@ -48,8 +48,11 @@ public class DatabaseConnection {
     }
 
     public void disconnect() throws SQLException {
-        if (connection != null && !connection.isClosed()) {
-            connection.close();
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+        } finally {
             connected = false;
         }
     }
@@ -63,7 +66,14 @@ public class DatabaseConnection {
     }
 
     public boolean isConnected() {
-        return connected && connection != null;
+        if (!connected || connection == null) {
+            return false;
+        }
+        try {
+            return !connection.isClosed();
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     public String getDatabaseType() {

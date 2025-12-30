@@ -55,7 +55,7 @@ public class MetadataService {
         try (Statement stmt = dbConnection.getConnection().createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
-                tables.add(rs.getString("table_name"));
+                tables.add(rs.getString(1));
             }
         }
         return tables;

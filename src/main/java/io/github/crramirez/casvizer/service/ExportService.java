@@ -40,8 +40,10 @@ public class ExportService {
                 List<String> values = new ArrayList<>();
                 for (Object value : row) {
                     String strValue = value != null ? value.toString() : "";
-                    // Escape quotes and wrap in quotes if contains comma or quote
-                    if (strValue.contains(",") || strValue.contains("\"") || strValue.contains("\n")) {
+                    // Escape quotes, newlines, and wrap in quotes if contains comma, quote, or newline
+                    if (strValue.contains(",") || strValue.contains("\"") || strValue.contains("\n") || strValue.contains("\r")) {
+                        // Replace newlines with space or escaped newline
+                        strValue = strValue.replace("\r\n", " ").replace("\n", " ").replace("\r", " ");
                         strValue = "\"" + strValue.replace("\"", "\"\"") + "\"";
                     }
                     values.add(strValue);
@@ -55,11 +57,18 @@ public class ExportService {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
             List<String> columns = result.getColumnNames();
             
+            // Quote table name and column names to prevent SQL injection
+            String quotedTableName = quoteIdentifier(tableName);
+            List<String> quotedColumns = new ArrayList<>();
+            for (String column : columns) {
+                quotedColumns.add(quoteIdentifier(column));
+            }
+            
             for (List<Object> row : result.getRows()) {
                 StringBuilder sql = new StringBuilder("INSERT INTO ");
-                sql.append(tableName);
+                sql.append(quotedTableName);
                 sql.append(" (");
-                sql.append(String.join(", ", columns));
+                sql.append(String.join(", ", quotedColumns));
                 sql.append(") VALUES (");
                 
                 for (int i = 0; i < row.size(); i++) {
@@ -70,7 +79,11 @@ public class ExportService {
                     if (value == null) {
                         sql.append("NULL");
                     } else if (value instanceof String) {
-                        sql.append("'").append(value.toString().replace("'", "''")).append("'");
+                        // Escape single quotes and backslashes for SQL
+                        String strValue = value.toString()
+                            .replace("\\", "\\\\")
+                            .replace("'", "''");
+                        sql.append("'").append(strValue).append("'");
                     } else {
                         sql.append(value.toString());
                     }
@@ -79,6 +92,17 @@ public class ExportService {
                 writer.println(sql.toString());
             }
         }
+    }
+    
+    /**
+     * Quote an identifier (table or column name) for SQL.
+     * Uses double quotes which work for PostgreSQL and MySQL with ANSI_QUOTES.
+     */
+    private String quoteIdentifier(String identifier) {
+        if (identifier == null || identifier.isEmpty()) {
+            throw new IllegalArgumentException("Identifier must not be null or empty");
+        }
+        return "\"" + identifier.replace("\"", "\"\"") + "\"";
     }
 
     public void exportToText(QueryResult result, String filename) throws IOException {

@@ -29,12 +29,18 @@ public class PostgresDialect implements Dialect {
 
     @Override
     public String addPagination(String query, int limit, int offset) {
+        if (limit < 0) {
+            throw new IllegalArgumentException("Limit must be a non-negative integer");
+        }
+        if (offset < 0) {
+            throw new IllegalArgumentException("Offset must be a non-negative integer");
+        }
         return query + " LIMIT " + limit + " OFFSET " + offset;
     }
 
     @Override
     public String getExplainQuery(String query) {
-        return "EXPLAIN ANALYZE " + query;
+        return "EXPLAIN " + query;
     }
 
     @Override

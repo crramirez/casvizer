@@ -18,12 +18,14 @@
 package io.github.crramirez.casvizer.ui;
 
 import casciian.TApplication;
+import casciian.TList;
 import casciian.TWindow;
 import io.github.crramirez.casvizer.model.DatabaseConnection;
 import io.github.crramirez.casvizer.service.ConnectionService;
 import io.github.crramirez.casvizer.service.MetadataService;
 import io.github.crramirez.casvizer.service.QueryService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,6 +35,7 @@ public class DatabaseBrowserWindow extends TWindow {
     private final ConnectionService connectionService;
     private final MetadataService metadataService;
     private final QueryService queryService;
+    private TList structureList;
     
     // UI layout constants
     private static final int BOTTOM_MARGIN = 4;
@@ -52,10 +55,9 @@ public class DatabaseBrowserWindow extends TWindow {
     private void setupUI() {
         int row = 1;
         addLabel("Database Structure:", 2, row++);
-        addLabel("", 2, row++);
         
-        // Add tree or list view for database objects
-        addLabel("Loading database structure...", 2, row++);
+        // Add list view for database objects
+        structureList = addList(new ArrayList<>(), 2, row, getWidth() - 4, getHeight() - row - BOTTOM_MARGIN, null);
         
         row = getHeight() - 3;
         addButton("&Refresh", 2, row, this::loadDatabaseStructure);
@@ -66,27 +68,37 @@ public class DatabaseBrowserWindow extends TWindow {
         try {
             DatabaseConnection connection = connectionService.getActiveConnection();
             if (connection == null) {
+                structureList.setList(List.of("No active connection"));
                 return;
             }
             
+            List<String> items = new ArrayList<>();
             List<String> schemas = metadataService.listSchemas(connection);
             
-            // Display schemas in the window
-            int row = 3;
+            // Build hierarchical list of database objects
             for (String schema : schemas) {
-                if (row < getHeight() - BOTTOM_MARGIN) {
-                    addLabel("Schema: " + schema, 2, row++);
+                items.add("Schema: " + schema);
+                
+                // List tables in schema
+                List<String> tables = metadataService.listTables(connection, schema);
+                for (String table : tables) {
+                    items.add("  Table: " + table);
                     
-                    // List tables in schema
-                    List<String> tables = metadataService.listTables(connection, schema);
-                    for (String table : tables) {
-                        if (row < getHeight() - BOTTOM_MARGIN) {
-                            addLabel("  Table: " + table, 2, row++);
-                        }
-                    }
+                    // Optionally list columns (commented out to avoid too much detail)
+                    // List<MetadataService.ColumnInfo> columns = metadataService.listColumns(connection, schema, table);
+                    // for (MetadataService.ColumnInfo col : columns) {
+                    //     items.add("    Column: " + col.toString());
+                    // }
                 }
             }
+            
+            if (items.isEmpty()) {
+                items.add("No schemas found");
+            }
+            
+            structureList.setList(items);
         } catch (Exception e) {
+            structureList.setList(List.of("Error loading database structure: " + e.getMessage()));
             getApplication().messageBox("Error", "Failed to load database structure: " + e.getMessage());
         }
     }

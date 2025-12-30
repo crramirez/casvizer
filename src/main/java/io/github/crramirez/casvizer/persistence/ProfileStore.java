@@ -45,8 +45,17 @@ public class ProfileStore {
         
         // Ensure parent directory exists
         File parentDir = profilesFile.getParentFile();
-        if (parentDir != null && !parentDir.exists()) {
-            parentDir.mkdirs();
+        if (parentDir != null) {
+            if (parentDir.exists()) {
+                if (!parentDir.isDirectory()) {
+                    throw new IllegalStateException("Parent path is not a directory: " + parentDir.getAbsolutePath());
+                }
+            } else {
+                boolean created = parentDir.mkdirs();
+                if (!created && !parentDir.isDirectory()) {
+                    throw new IllegalStateException("Failed to create profiles directory: " + parentDir.getAbsolutePath());
+                }
+            }
         }
     }
 

@@ -73,6 +73,10 @@ public class SecretsStore {
         try {
             return encryptor.decrypt(encryptedText);
         } catch (Exception e) {
+            System.err.println("WARNING: Failed to decrypt value in SecretsStore. " +
+                "Falling back to returning the original text. " +
+                "Check that CASVIZER_MASTER_PASSWORD is correctly configured.");
+            e.printStackTrace(System.err);
             // If decryption fails, assume it's already plaintext
             return encryptedText;
         }
