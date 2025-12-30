@@ -67,6 +67,18 @@ public class ExportService {
         return value;
     }
 
+    /**
+     * Exports query results to SQL INSERT statements.
+     * <p>
+     * Note: This method generates individual INSERT statements for each row, which is not
+     * optimized for large datasets. For better performance with large result sets, consider
+     * using database-specific bulk loading mechanisms (e.g., COPY commands, batch inserts).
+     * 
+     * @param result The query result to export
+     * @param tableName The target table name for INSERT statements
+     * @param filename The output file path
+     * @throws IOException if file writing fails
+     */
     public void exportToSQL(QueryResult result, String tableName, String filename) throws IOException {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
             List<String> columns = result.getColumnNames();

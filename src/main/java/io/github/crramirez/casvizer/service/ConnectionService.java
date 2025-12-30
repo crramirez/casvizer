@@ -53,11 +53,28 @@ public class ConnectionService {
     }
 
     public void disconnectAll() throws SQLException {
-        for (DatabaseConnection connection : connections.values()) {
-            connection.disconnect();
+        // Create snapshot to avoid concurrent modification issues
+        List<DatabaseConnection> snapshot = new ArrayList<>(connections.values());
+        SQLException firstException = null;
+
+        for (DatabaseConnection connection : snapshot) {
+            try {
+                connection.disconnect();
+            } catch (SQLException e) {
+                if (firstException == null) {
+                    firstException = e;
+                } else {
+                    firstException.addSuppressed(e);
+                }
+            }
         }
+
         connections.clear();
         activeConnection = null;
+
+        if (firstException != null) {
+            throw firstException;
+        }
     }
 
     public DatabaseConnection getActiveConnection() {

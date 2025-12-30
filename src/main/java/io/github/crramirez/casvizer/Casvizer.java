@@ -238,7 +238,8 @@ public class Casvizer extends TApplication {
     public static void main(String[] args) {
         try {
             Casvizer app = new Casvizer();
-            (new Thread(app)).start();
+            Thread appThread = new Thread(app);
+            appThread.start();
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);

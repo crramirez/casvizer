@@ -98,8 +98,9 @@ public class DatabaseBrowserWindow extends TWindow {
             
             structureList.setList(items);
         } catch (Exception e) {
-            structureList.setList(List.of("Error loading database structure: " + e.getMessage()));
-            getApplication().messageBox("Error", "Failed to load database structure: " + e.getMessage());
+            String errorMsg = (e.getMessage() != null) ? e.getMessage() : e.getClass().getSimpleName();
+            structureList.setList(List.of("Error loading database structure: " + errorMsg));
+            getApplication().messageBox("Error", "Failed to load database structure: " + errorMsg);
         }
     }
 }

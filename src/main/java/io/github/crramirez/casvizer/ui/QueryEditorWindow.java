@@ -84,7 +84,8 @@ public class QueryEditorWindow extends TWindow {
             currentResult = result;
             displayResults(result);
         } catch (Exception e) {
-            getApplication().messageBox("Error", "Query execution failed: " + e.getMessage());
+            String errorMsg = (e.getMessage() != null) ? e.getMessage() : e.getClass().getSimpleName();
+            getApplication().messageBox("Error", "Query execution failed: " + errorMsg);
         }
     }
 
@@ -125,16 +126,18 @@ public class QueryEditorWindow extends TWindow {
         }
         
         try {
-            // Use system-appropriate temporary directory
+            // Use system-appropriate temporary directory with timestamp to avoid overwriting
+            String timestamp = String.valueOf(System.currentTimeMillis());
             java.nio.file.Path tempPath = java.nio.file.Paths.get(
                 System.getProperty("java.io.tmpdir"), 
-                "query_results.csv"
+                "query_results_" + timestamp + ".csv"
             );
             String filename = tempPath.toString();
             exportService.exportToCSV(currentResult, filename);
             getApplication().messageBox("Success", "Results exported to " + filename);
         } catch (Exception e) {
-            getApplication().messageBox("Error", "Export failed: " + e.getMessage());
+            String errorMsg = (e.getMessage() != null) ? e.getMessage() : e.getClass().getSimpleName();
+            getApplication().messageBox("Error", "Export failed: " + errorMsg);
         }
     }
 }

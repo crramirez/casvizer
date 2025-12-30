@@ -39,10 +39,31 @@ public class QueryService {
      */
     private static final int MAX_QUERY_OFFSET = 1_000_000;
     
+    /**
+     * Executes a SQL query without pagination.
+     * 
+     * @param dbConnection The database connection to use
+     * @param query The SQL query to execute
+     * @return QueryResult containing columns, rows, and execution metadata
+     * @throws SQLException if query execution fails
+     */
     public QueryResult executeQuery(DatabaseConnection dbConnection, String query) throws SQLException {
         return executeQuery(dbConnection, query, -1, 0);
     }
 
+    /**
+     * Executes a SQL query with optional pagination.
+     * <p>
+     * Note: Execution time includes both query execution and result set processing time.
+     * 
+     * @param dbConnection The database connection to use
+     * @param query The SQL query to execute
+     * @param limit Maximum number of rows to return (-1 for no limit)
+     * @param offset Number of rows to skip before returning results
+     * @return QueryResult containing columns, rows, and execution metadata
+     * @throws SQLException if query execution fails
+     * @throws IllegalArgumentException if offset exceeds MAX_QUERY_OFFSET
+     */
     public QueryResult executeQuery(DatabaseConnection dbConnection, String query, int limit, int offset) throws SQLException {
         long startTime = System.currentTimeMillis();
         
