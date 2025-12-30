@@ -21,21 +21,38 @@ import org.jasypt.util.text.BasicTextEncryptor;
 
 /**
  * Handles encryption and decryption of sensitive data like passwords.
+ * 
+ * Security Note: Uses a default encryption key if CASVIZER_MASTER_PASSWORD 
+ * environment variable is not set. For production use, always set a strong 
+ * master password via the environment variable.
  */
 public class SecretsStore {
     private final BasicTextEncryptor encryptor;
     private static final String DEFAULT_PASSWORD = "casvizer-secret-key-change-me";
 
+    /**
+     * Constructor. Initializes the encryptor with either the environment-provided
+     * password or a default password with a warning.
+     */
     public SecretsStore() {
         this.encryptor = new BasicTextEncryptor();
         // In production, this should come from environment variable or secure key store
         String password = System.getenv("CASVIZER_MASTER_PASSWORD");
         if (password == null || password.isEmpty()) {
             password = DEFAULT_PASSWORD;
+            // Warn user about insecure default
+            System.err.println("WARNING: Using default encryption password. " +
+                "Set CASVIZER_MASTER_PASSWORD environment variable for better security.");
         }
         encryptor.setPassword(password);
     }
 
+    /**
+     * Encrypts plaintext string.
+     * 
+     * @param plainText The text to encrypt
+     * @return Encrypted text
+     */
     public String encrypt(String plainText) {
         if (plainText == null || plainText.isEmpty()) {
             return plainText;
@@ -43,6 +60,12 @@ public class SecretsStore {
         return encryptor.encrypt(plainText);
     }
 
+    /**
+     * Decrypts encrypted text.
+     * 
+     * @param encryptedText The text to decrypt
+     * @return Decrypted text
+     */
     public String decrypt(String encryptedText) {
         if (encryptedText == null || encryptedText.isEmpty()) {
             return encryptedText;
