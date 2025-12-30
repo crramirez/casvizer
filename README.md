@@ -1,10 +1,46 @@
-# Casciian App Template
+# Casvizer
 
-Application template for building [Casciian](https://github.com/crramirez/casciian) TUI-based applications. This template includes support for native builds, DEB and RPM package generation.
+Database visualization TUI (Text User Interface) tool based on [Casciian](https://github.com/crramirez/casciian). Think of it as a terminal-based DBVisualizer or DBeaver.
 
 ## Description
 
-This is a starter template for creating text-based user interface (TUI) applications using the Casciian Java library. It includes a simple "Hello World" demonstration that you can customize for your own application.
+Casvizer is a powerful database client with a text-based user interface that supports multiple database systems. It provides a rich set of features for database management, querying, and visualization, all within your terminal.
+
+### Features
+
+- **Multi-Database Support**: Connect to PostgreSQL, MySQL, and SQLite databases
+- **Connection Profiles**: Save and manage multiple database connection profiles with encrypted credentials
+- **Database Browser**: Navigate database schemas, tables, and columns
+- **Query Editor**: Execute SQL queries with syntax highlighting and results visualization
+- **Query Pagination**: Built-in support for paginated query results
+- **Export Data**: Export query results to CSV, SQL, or text formats
+- **Query Explanation**: View query execution plans (EXPLAIN)
+- **Secure Storage**: Encrypted password storage for connection profiles
+
+### Architecture
+
+The application follows a layered architecture:
+
+1. **UI Layer** (Casciian-based TUI)
+   - Main application window with menus
+   - Connection dialog for managing profiles
+   - Database browser for schema exploration
+   - Query editor for SQL execution
+
+2. **Domain/Services Layer**
+   - `ConnectionService`: Manages database connections
+   - `MetadataService`: Database introspection and metadata retrieval
+   - `QueryService`: Query execution with pagination support
+   - `ExportService`: Data export to various formats
+
+3. **Driver/DB Adapters**
+   - `Dialect` interface for database-specific operations
+   - Implementations: `PostgresDialect`, `MySQLDialect`, `SQLiteDialect`
+   - Handles quoting, pagination syntax, EXPLAIN queries, and schema operations
+
+4. **Persistence Layer**
+   - `ProfileStore`: Stores connection profiles in JSON format
+   - `SecretsStore`: Encrypts/decrypts sensitive credentials
 
 ## Prerequisites
 
@@ -27,15 +63,26 @@ This creates a JAR file in `build/libs/casciianapp-<version>.jar`
 
 ```bash
 ./gradlew installDist
-./build/install/casciianapp/bin/casciianapp
+./build/install/casvizer/bin/casvizer
 ```
 
 Or with Java directly:
 
 ```bash
 export JAVA_HOME=/usr/lib/jvm/temurin-21-jdk-amd64
-java -jar build/libs/casciianapp-<version>.jar
+java -jar build/libs/casvizer-<version>.jar
 ```
+
+### Using Casvizer
+
+1. **Start the application** - You'll see a welcome screen
+2. **Create a connection** - Use `Connection > New Connection` menu
+3. **Browse database** - Use `Tools > Database Browser` to explore schemas and tables
+4. **Execute queries** - Use `Tools > Query Editor` to run SQL queries
+
+### Connection Profiles
+
+Connection profiles are stored in `~/.casvizer/profiles.json` with encrypted passwords. You can set a custom encryption key using the `CASVIZER_MASTER_PASSWORD` environment variable.
 
 ### Native Image Compilation (Required for Packaging)
 
@@ -62,7 +109,7 @@ Or download directly from [GraalVM Downloads](https://www.graalvm.org/downloads/
 ./gradlew nativeCompile
 ```
 
-This creates a native executable at `build/native/nativeCompile/casciianapp`
+This creates a native executable at `build/native/nativeCompile/casvizer`
 
 ### Creating DEB and RPM Packages
 
@@ -92,58 +139,84 @@ Or build individually:
 ```
 
 The packages will include only:
-- `/usr/bin/casciianapp` - Native executable binary
+- `/usr/bin/casvizer` - Native executable binary
 
 #### Installing the Packages
 
 **Debian/Ubuntu:**
 ```bash
-sudo dpkg -i build/distributions/deb/casciianapp_0.1.0-1_amd64.deb
+sudo dpkg -i build/distributions/deb/casvizer_0.1.0-1_amd64.deb
 sudo apt-get install -f  # Install dependencies if needed
 ```
 
 **RedHat/CentOS/Fedora:**
 ```bash
-sudo rpm -ivh build/distributions/rpm/casciianapp-0.1.0-1.x86_64.rpm
+sudo rpm -ivh build/distributions/rpm/casvizer-0.1.0-1.x86_64.rpm
 ```
 
 After installation, you can run the application:
 ```bash
-casciianapp
+casvizer
 ```
 
-## Customizing the Template
+## Customizing and Extending
 
-This template is designed to be a starting point for your own Casciian-based application:
+This database visualization tool is designed to be extended with additional features:
 
-1. **Rename the project**: Update `settings.gradle` to change the project name
-2. **Update package names**: Modify the package structure in `src/main/java/` to match your organization
-3. **Customize the application**: Edit `HelloWorld.java` or create new classes for your application logic
-4. **Update metadata**: 
-   - Edit `build.gradle` to update group, description, URLs, and maintainer information
-   - Update `gradle.properties` to set your version
-5. **Update documentation**: Modify this README to describe your specific application
+1. **Add new database dialects**: Implement the `Dialect` interface for other databases
+2. **Enhance UI components**: Extend the TUI windows with more advanced features
+3. **Add export formats**: Implement new export formats in `ExportService`
+4. **Customize connection profiles**: Extend `ConnectionProfile` with additional properties
+5. **Add authentication methods**: Support different authentication mechanisms
 
 ## Project Structure
 
 ```
-casciianapp/
+casvizer/
 ├── build.gradle              # Gradle build configuration
 ├── settings.gradle           # Gradle settings
 ├── gradle.properties         # Project version and properties
 ├── src/
 │   └── main/
 │       └── java/
-│           └── io/github/crramirez/casciianapp/
-│               └── HelloWorld.java   # Main application (customize this!)
+│           └── io/github/crramirez/casvizer/
+│               ├── Casvizer.java          # Main application
+│               ├── model/                 # Domain models
+│               │   ├── ConnectionProfile.java
+│               │   ├── DatabaseConnection.java
+│               │   └── QueryResult.java
+│               ├── dialect/               # Database dialects
+│               │   ├── Dialect.java
+│               │   ├── DialectFactory.java
+│               │   ├── PostgresDialect.java
+│               │   ├── MySQLDialect.java
+│               │   └── SQLiteDialect.java
+│               ├── service/               # Business logic services
+│               │   ├── ConnectionService.java
+│               │   ├── MetadataService.java
+│               │   ├── QueryService.java
+│               │   └── ExportService.java
+│               ├── persistence/           # Data persistence
+│               │   ├── ProfileStore.java
+│               │   └── SecretsStore.java
+│               └── ui/                    # TUI components
+│                   ├── ConnectionDialog.java
+│                   ├── DatabaseBrowserWindow.java
+│                   └── QueryEditorWindow.java
 └── README.md
 ```
 
 ## License
 
-Apache License 2.0 - Copyright 2025 [Your Name Here]
+Apache License 2.0 - Copyright 2025 Carlos Rafael Ramirez
 
 ## Dependencies
 
 - [Casciian 1.0](https://github.com/crramirez/casciian) - Java Text User Interface library
+- PostgreSQL JDBC Driver 42.7.4
+- MySQL Connector/J 9.1.0
+- SQLite JDBC Driver 3.47.1.0
+- Gson 2.11.0 - JSON parsing
+- Night Config 3.8.1 - TOML parsing
+- Jasypt 1.9.3 - Password encryption
 
